@@ -1,4 +1,4 @@
-import { example } from "./ex07";
+import { example } from "./ex08";
 import "./styles.css";
 
 example();
