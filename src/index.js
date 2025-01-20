@@ -1,4 +1,4 @@
-import { example } from "./ex-translate";
+import { example } from "./ex10";
 import "./styles.css";
 
 example();
