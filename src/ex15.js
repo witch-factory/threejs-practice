@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import dat from "dat.gui";
-import { OrbitControls } from "three/examples/jsm/Addons.js";
+import { DragControls } from "three/examples/jsm/Addons.js";
 
 export function example() {
   // renderer
@@ -30,28 +30,6 @@ export function example() {
   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
   directionalLight.position.set(1, 2, 0);
   scene.add(directionalLight);
-
-  // 카메라와 렌더러 요소가 인수로 들어감
-  // 수직 방향의 회전 제한이 없는 TrackballControls를 쓸 수도 있다
-  // TrackballControls는 draw에서 update를 해줘야 한다
-  const controls = new OrbitControls(camera, renderer.domElement);
-  // 여러 컨트롤 옵션들(이외에도 있음)
-  // 카메라 이동을 부드럽게
-  controls.enableDamping = true;
-  // 줌 사용 불가
-  // controls.enableZoom = false;
-  // 줌 최소/최대 거리 설정
-  // controls.minDistance = 5;
-  // controls.maxDistance = 10;
-  // 극좌표 기준으로 최대 회전 각도 설정
-  // controls.maxPolarAngle = Math.PI / 2;
-  // 회전 중심점 설정
-  // controls.target.set(2,2,2);
-  // 자동 회전
-  controls.autoRotate = true;
-  // 회전 속도
-  // controls.autoRotateSpeed = 2;
-
   // 인수가 사이즈
   const axesHelper = new THREE.AxesHelper(3);
   scene.add(axesHelper);
@@ -62,6 +40,7 @@ export function example() {
   const geometry = new THREE.BoxGeometry(1, 1, 1);
 
   let mesh, material;
+  const meshes = [];
   for (let i = 0; i < 20; i++) {
     material = new THREE.MeshStandardMaterial({
       color: `rgb(
@@ -73,8 +52,19 @@ export function example() {
     mesh.position.x = (Math.random() - 0.5) * 10;
     mesh.position.y = (Math.random() - 0.5) * 10;
     mesh.position.z = (Math.random() - 0.5) * 10;
+    mesh.name = `mesh-${i}`;
     scene.add(mesh);
+    meshes.push(mesh);
   }
+
+  // 드래그 컨트롤
+  // mesh 배열, 카메라, 렌더러 요소를 인수로 받음
+  // 배열의 요소들을 드래그로 컨트롤할 수 있도록 해줌
+  const controls = new DragControls(meshes, camera, renderer.domElement);
+  controls.addEventListener("dragstart", function (event) {
+    // 드래그된 mesh object가 event.object로 들어옴
+    console.log("dragstart", event.object.name);
+  });
 
   // JS의 객체 속성값을 GUI로 조정할 수 있게 해줌
   const gui = new dat.GUI();
@@ -85,9 +75,9 @@ export function example() {
 
   const clock = new THREE.Clock();
   function draw() {
-    const time = clock.getElapsedTime();
+    const time = clock.getDelta();
 
-    controls.update();
+    controls.update(time);
     renderer.render(scene, camera);
 
     renderer.setAnimationLoop(draw);

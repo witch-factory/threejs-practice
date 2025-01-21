@@ -1,6 +1,10 @@
 import * as THREE from "three";
 import dat from "dat.gui";
-import { OrbitControls } from "three/examples/jsm/Addons.js";
+import {
+  FlyControls,
+  OrbitControls,
+  PointerLockControls,
+} from "three/examples/jsm/Addons.js";
 
 export function example() {
   // renderer
@@ -32,25 +36,16 @@ export function example() {
   scene.add(directionalLight);
 
   // 카메라와 렌더러 요소가 인수로 들어감
-  // 수직 방향의 회전 제한이 없는 TrackballControls를 쓸 수도 있다
-  // TrackballControls는 draw에서 update를 해줘야 한다
-  const controls = new OrbitControls(camera, renderer.domElement);
-  // 여러 컨트롤 옵션들(이외에도 있음)
-  // 카메라 이동을 부드럽게
-  controls.enableDamping = true;
-  // 줌 사용 불가
-  // controls.enableZoom = false;
-  // 줌 최소/최대 거리 설정
-  // controls.minDistance = 5;
-  // controls.maxDistance = 10;
-  // 극좌표 기준으로 최대 회전 각도 설정
-  // controls.maxPolarAngle = Math.PI / 2;
-  // 회전 중심점 설정
-  // controls.target.set(2,2,2);
-  // 자동 회전
-  controls.autoRotate = true;
-  // 회전 속도
-  // controls.autoRotateSpeed = 2;
+  const controls = new PointerLockControls(camera, renderer.domElement);
+
+  // 이벤트에 따라서 커서 사라지고 컨트롤러 활성화할 수 있도록 하는 코드
+  controls.domElement.addEventListener("click", function () {
+    controls.lock();
+  });
+  // lock 이벤트도 있다
+  controls.addEventListener("lock", function () {
+    console.log("PointerLockControls enabled");
+  });
 
   // 인수가 사이즈
   const axesHelper = new THREE.AxesHelper(3);
@@ -85,9 +80,9 @@ export function example() {
 
   const clock = new THREE.Clock();
   function draw() {
-    const time = clock.getElapsedTime();
+    const time = clock.getDelta();
 
-    controls.update();
+    controls.update(time);
     renderer.render(scene, camera);
 
     renderer.setAnimationLoop(draw);
