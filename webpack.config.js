@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.js",
@@ -20,15 +21,24 @@ module.exports = {
           loader: "babel-loader",
         },
       },
+      {
+        test: /\.(png|jpg|jpeg|gif|webp)$/i,
+        type: "asset/resource",
+      },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: "./src/index.html",
     }),
+    new CopyPlugin({
+      patterns: [{ from: "static", to: "static" }],
+    }),
   ],
   devServer: {
-    static: "./dist",
+    static: {
+      directory: path.join(__dirname, "static"),
+    },
     open: true,
   },
   mode: "development",
